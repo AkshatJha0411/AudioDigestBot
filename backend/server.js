@@ -5,7 +5,7 @@ const path = require("path");
 
 const app = express();
 const PORT = 5000;
-
+const fs = require("fs");
 // Connect to MongoDB
 connect("mongodb://127.0.0.1:27017/audio-uploader", {});
 
@@ -20,7 +20,16 @@ const Audio = model("Audio", audioSchema);
 const storage = multer.diskStorage({
   destination: "uploads/",
   filename: (req, file, cb) => {
-    cb(null, file.originalname);
+    const filePath = path.join(__dirname, "uploads", "audio.wav");
+    // Check if file exists
+    fs.access(filePath, fs.constants.F_OK, (err) => {
+      if (!err) {
+        // File exists, delete it
+        fs.unlinkSync(filePath);
+      }
+      // Proceed with saving the new file
+      cb(null, "audio.wav");
+    });
   },
 });
 const upload = multer({ storage });
